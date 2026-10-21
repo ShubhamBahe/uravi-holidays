@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plan Your Trip | Uravi Holidays</title>
+    <meta
+      name="description"
+      content="Contact Shankartaj Gaikwad, Travel Consultant at Uravi Holidays."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%230d6b6b%27/%3E%3Ctext x=%2732%27 y=%2745%27 font-size=%2740%27 font-family=%27Georgia%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27%23e0a93b%27%3EU%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-page="contact">
+    <div id="site-header"></div>
+    <main>
+      <section class="banner" id="banner"></section>
+      <section class="section">
+        <div class="container contact">
+          <div>
+            <h2>Talk to a travel consultant</h2>
+            <div class="consultant">
+              <i class="fa fa-user-circle"></i>
+              <div>
+                <strong>Shankartaj Gaikwad</strong
+                ><span>Travel Consultant</span>
+              </div>
+            </div>
+            <p>
+              <a class="contact__line" href="tel:+918329056457"
+                ><i class="fa fa-phone"></i> +91 83290 56457</a
+              >
+            </p>
+            <p>
+              <a class="contact__line" href="tel:+918766043591"
+                ><i class="fa fa-phone"></i> +91 87660 43591</a
+              >
+            </p>
+            <p class="note">
+              Uravi Holidays plans domestic and international holidays: hotels,
+              transfers, sightseeing and tickets.
+            </p>
+          </div>
+          <form class="form" id="enquiry" novalidate>
+            <label
+              >Your name<input
+                type="text"
+                id="fName"
+                required
+                autocomplete="name"
+            /></label>
+            <label>Destination<select id="fPlace"></select></label>
+            <div class="form__row">
+              <label>Travel month<input type="month" id="fMonth" /></label>
+              <label
+                >Travellers<input type="number" id="fPeople" min="1" value="2"
+              /></label>
+            </div>
+            <button class="btn" type="submit">Send on WhatsApp</button>
+            <p class="form__msg" id="formMsg" role="status"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="section section--tint">
+        <div class="container faq">
+          <h2 class="section-title">Common questions</h2>
+          <details>
+            <summary>How do I get a price?</summary>
+            <p>
+              Tap Get Quote on any destination or send the form. We reply on
+              WhatsApp with a plan and price.
+            </p>
+          </details>
+          <details>
+            <summary>Can the plan be changed?</summary>
+            <p>
+              Yes. We adjust the days, hotels, meals and budget to suit your
+              group.
+            </p>
+          </details>
+          <details>
+            <summary>Do you arrange tickets and transfers?</summary>
+            <p>
+              Yes. Flights, trains, airport transfers and sightseeing can all be
+              included.
+            </p>
+          </details>
+          <details>
+            <summary>Can I travel with family or a group?</summary>
+            <p>
+              Yes. Tell us how many travellers and their ages so we plan the
+              right rooms and activities.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+    <div id="site-footer"></div>
+    <script src="script.js"></script>
+  </body>
+</html>

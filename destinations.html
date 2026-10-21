@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tour Destinations | Uravi Holidays</title>
+    <meta
+      name="description"
+      content="Browse India and international tour packages by Uravi Holidays."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%230d6b6b%27/%3E%3Ctext x=%2732%27 y=%2745%27 font-size=%2740%27 font-family=%27Georgia%27 font-weight=%27bold%27 text-anchor=%27middle%27 fill=%27%23e0a93b%27%3EU%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-page="destinations">
+    <div id="site-header"></div>
+    <main>
+      <section class="banner" id="banner"></section>
+      <section class="section">
+        <div class="container">
+          <div
+            class="filters"
+            id="filters"
+            role="group"
+            aria-label="Filter destinations"
+          >
+            <button class="chip is-active" data-filter="all">All</button>
+            <button class="chip" data-filter="nagpur">Near Nagpur</button>
+            <button class="chip" data-filter="india">India</button>
+            <button class="chip" data-filter="world">International</button>
+          </div>
+          <div class="cards" id="cards"></div>
+        </div>
+      </section>
+    </main>
+    <div id="site-footer"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
