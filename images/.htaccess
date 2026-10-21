@@ -1,6 +1,0 @@
-# Uploaded photos only: never run scripts from here
-<FilesMatch "\.(php|phtml|phar|php5|php7)$">
-  <IfModule mod_authz_core.c>
-    Require all denied
-  </IfModule>
-</FilesMatch>
