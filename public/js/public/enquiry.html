@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customized Holidays | Uravi Holidays</title>
+<meta name="description" content="Customised holidays and corporate travel planned by Uravi Holidays, Nagpur.">
+<link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+<main>
+<section class="page-title"><div class="container">
+  <h1 id="pageH1">Customized Holidays</h1>
+  <div class="title-line" aria-hidden="true"><span></span><span></span><span></span></div>
+  <ol class="breadcrumb" id="crumbs"><li><a href="/index.php">Home</a></li><li aria-current="page">Customized Holidays</li></ol>
+</div></section>
+  <div class="container contact">
+    <div class="contact__info">
+      <h2 id="enqH2">Holidays built around you</h2>
+      <p id="enqP">Share your dates, group size and budget. We design the itinerary, hotels and transport and send you a quote.</p>
+      <ul class="ticks" id="enqList"></ul>
+    </div>
+    <div class="side-card" id="enqForm"></div>
+  </div>
+</main>
+<div id="site-footer"></div>
+<script src="/js/common.js"></script>
+<script src="/js/uravi-site.js"></script>
+<script>
+(function () {
+  var corp = AVM.currentFile().toLowerCase() === 'corporate-travel.php';
+  var t = corp ? 'Corporate Travel' : 'Customized Holidays';
+  document.title = t + ' | Uravi Holidays';
+  AVM.$('#pageH1').textContent = t;
+  AVM.$('#crumbs').innerHTML = '<li><a href="/index.php">Home</a></li><li aria-current="page">' + t + '</li>';
+  var items = corp
+    ? ['Business trips, conferences and incentive tours', 'Group tickets, hotels and ground transport', 'Team outings and adventure camps near Nagpur', 'One point of contact for your whole team']
+    : ["Family, honeymoon and friends' trips", 'Domestic and international destinations', 'Hotels, transfers and sightseeing in one plan', 'We edit the plan until you are happy'];
+  if (corp) { AVM.$('#enqH2').textContent = 'Travel for your team, handled'; AVM.$('#enqP').textContent = 'Tell us about your group and we will prepare a corporate travel proposal.'; }
+  AVM.$('#enqList').innerHTML = items.map(function (i) { return '<li>' + AVM.esc(i) + '</li>'; }).join('');
+  AVM.enquiryForm(AVM.$('#enqForm'), { type: corp ? 'corporate' : 'custom', title: corp ? 'Request a corporate quote' : 'Plan my holiday',
+    fields: ['name', 'phone', 'email', 'destination', 'travel_date', 'travelers', 'budget', 'message'], submit: 'Request a Quote' });
+})();
+</script>
+</body>
+</html>

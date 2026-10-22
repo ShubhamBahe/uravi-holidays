@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | Uravi Holidays</title>
+<meta name="description" content="Admin">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/style.css">
+<style>
+.tabs{display:flex;gap:8px;margin:16px 0}.tab{border:2px solid var(--brand);background:#fff;color:var(--brand);padding:8px 18px;border-radius:999px;font:600 14px 'Poppins',sans-serif;cursor:pointer}.tab.is-on{background:var(--brand);color:#fff}
+.ph-help{color:var(--muted);font-size:14px;margin:0 0 12px}.ph-check{display:flex;align-items:center;gap:6px;font-size:14px}.ph-pick{cursor:pointer;margin:0}
+.ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.ph-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.ph-card img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#eef1f4}.ph-card--logo img{object-fit:contain;padding:12px;background:#fff}
+.ph-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}.ph-name{font-weight:600;font-size:14px;line-height:1.3}
+.ph-meta{font-size:12px;color:var(--muted)}.ph-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;background:#eef1f4;color:#3e4c59;align-self:flex-start}.ph-badge--up{background:#d1fadf;color:#067647}
+.ph-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}.ph-actions .btn{margin:0}.ph-card.is-busy{opacity:.55;pointer-events:none}
+</style>
+</head>
+<body>
+<main class="admin">
+  <section id="loginBox" class="admin__login" hidden>
+    <img src="/images/logo.svg" alt="Uravi Holidays" height="48">
+    <h1>Admin sign in</h1>
+    <form id="loginForm" class="form">
+      <label>Password<input type="password" name="password" required autocomplete="current-password"></label>
+      <div class="form__status" id="loginStatus" role="status"></div>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+  </section>
+  <section id="panel" class="container" hidden>
+    <div class="admin__bar"><h1>Enquiries</h1>
+      <div><a class="btn btn--sm btn--ghost" href="/api/admin/export.csv">Export CSV</a> <button class="btn btn--sm" id="logout" type="button">Sign out</button></div></div>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab is-on" id="tabBtnEnq" role="tab" aria-selected="true">Enquiries</button>
+      <button type="button" class="tab" id="tabBtnPh" role="tab" aria-selected="false">Photos &amp; Logo</button>
+    </div>
+    <div id="tabEnq">
+    <div class="stats" id="stats"></div>
+    <div class="admin__filters">
+      <input type="search" id="aq" placeholder="Search name, phone, email, package…" aria-label="Search">
+      <select id="astatus" aria-label="Status"><option value="">All statuses</option><option>new</option><option>contacted</option><option>booked</option><option>closed</option></select>
+    </div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>#</th><th>Received</th><th>Name</th><th>Contact</th><th>Interest</th><th>Details</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+    <div class="pager"><button class="btn btn--sm btn--ghost" id="prev" type="button">Previous</button> <span id="pageInfo"></span> <button class="btn btn--sm btn--ghost" id="next" type="button">Next</button></div>
+    </div>
+    <div id="tabPhotos" hidden>
+      <p class="ph-help">Upload a real photo for any package, or your logo. JPG, PNG or WebP. Large photos are shrunk automatically. Bulk upload matches file names to packages (for example <code>main-goa-tour-package.jpg</code>, or <code>hero.jpg</code> for the home page background).</p>
+      <div class="admin__filters">
+        <input type="search" id="phQ" placeholder="Search packages…" aria-label="Search packages">
+        <label class="ph-check"><input type="checkbox" id="phOnly"> Only without my photo</label>
+        <label class="btn btn--sm ph-pick">Bulk upload<input type="file" id="phBulk" accept="image/jpeg,image/png,image/webp" multiple hidden></label>
+      </div>
+      <div class="form__status" id="phMsg" role="status" aria-live="polite"></div>
+      <div class="ph-grid" id="phGrid"></div>
+      <div class="cta-wrap"><button type="button" class="btn btn--ghost" id="phMore" hidden>Show more</button></div>
+    </div>
+  </section>
+</main>
+<script src="/js/admin.js"></script>
+<script>
+(function () {
+  var $ = function (i) { return document.getElementById(i); };
+  var tabEnq = $('tabEnq'), tabPh = $('tabPhotos'), bEnq = $('tabBtnEnq'), bPh = $('tabBtnPh');
+  var grid = $('phGrid'), msg = $('phMsg'), q = $('phQ'), only = $('phOnly'), more = $('phMore'), bulk = $('phBulk');
+  var data = null, shown = 36, loaded = false;
+
+  function say(t, bad) { msg.textContent = t; msg.style.color = bad ? '#b42318' : '#067647'; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function norm(s) { return String(s).toLowerCase().replace(/\.[a-z0-9]+$/, '').replace(/\.php$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+
+  function tab(which) {
+    var p = which === 'ph';
+    tabEnq.hidden = p; tabPh.hidden = !p;
+    bEnq.classList.toggle('is-on', !p); bPh.classList.toggle('is-on', p);
+    bEnq.setAttribute('aria-selected', String(!p)); bPh.setAttribute('aria-selected', String(p));
+    if (p && !loaded) load();
+  }
+  bEnq.addEventListener('click', function () { tab('enq'); });
+  bPh.addEventListener('click', function () { tab('ph'); });
+
+  function load() {
+    say('Loading…');
+    return fetch('/api/admin/photos', { credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error('Please sign in again.'); return r.json(); })
+      .then(function (d) { data = d; loaded = true; say(''); render(); })
+      .catch(function (e) { say(e.message, true); });
+  }
+
+  function shrink(file, max, type) {
+    return new Promise(function (resolve) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var w = img.naturalWidth, h = img.naturalHeight, s = Math.min(1, max / Math.max(w, h));
+        if (s === 1 && file.size < 1500 * 1024) return resolve(file);
+        var c = document.createElement('canvas'); c.width = Math.round(w * s); c.height = Math.round(h * s);
+        var x = c.getContext('2d');
+        if (type !== 'image/png') { x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); }
+        x.drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(function (b) { resolve(b || file); }, type, 0.86);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
+  function send(key, file) {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return Promise.reject(new Error('Please choose a JPG, PNG or WebP image.'));
+    var logo = key === 'logo';
+    return shrink(file, key === 'hero' ? 2000 : logo ? 1200 : 1600, logo && file.type === 'image/png' ? 'image/png' : 'image/jpeg').then(function (blob) {
+      return fetch('/api/admin/photos/' + encodeURIComponent(key), {
+        method: 'PUT', credentials: 'same-origin', body: blob,
+        headers: { 'X-Requested-With': 'fetch', 'Content-Type': blob.type }
+      });
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'Upload failed'); return j; });
+    });
+  }
+
+  function apply(key, j) {
+    if (key === 'logo' || key === 'hero') { data[key] = { url: j.url, source: 'upload' }; return; }
+    data.items.forEach(function (it) { if (it.key === key) { it.url = j.url; it.source = 'upload'; } });
+  }
+
+  function badge(src) {
+    return src === 'upload' ? '<span class="ph-badge ph-badge--up">Your photo</span>'
+      : src === 'file' ? '<span class="ph-badge">Photo file</span>' : '<span class="ph-badge">Illustration</span>';
+  }
+  function cardHtml(key, name, meta, url, src, isLogo) {
+    return '<div class="ph-card' + (isLogo ? ' ph-card--logo' : '') + '" data-key="' + esc(key) + '">' +
+      '<img src="' + esc(url) + '" alt="" loading="lazy">' +
+      '<div class="ph-body"><div class="ph-name">' + esc(name) + '</div>' +
+      (meta ? '<div class="ph-meta">' + esc(meta) + '</div>' : '') + badge(src) +
+      '<div class="ph-actions"><label class="btn btn--sm ph-pick">' + (src === 'upload' ? 'Replace' : 'Upload') +
+      '<input type="file" class="ph-file" accept="image/jpeg,image/png,image/webp" hidden></label>' +
+      (src === 'upload' ? '<button type="button" class="btn btn--sm btn--ghost ph-del">Remove</button>' : '') +
+      '</div></div></div>';
+  }
+
+  function filtered() {
+    var t = q.value.trim().toLowerCase();
+    return data.items.filter(function (it) {
+      if (only.checked && it.source === 'upload') return false;
+      return !t || (it.name + ' ' + it.region + ' ' + it.key).toLowerCase().indexOf(t) > -1;
+    });
+  }
+  function render() {
+    if (!data) return;
+    var list = filtered(), html = '';
+    if (!q.value.trim() && !only.checked) html += cardHtml('logo', 'Website logo', 'Shown in the header', data.logo.url, data.logo.source, true) + cardHtml('hero', 'Home page background', 'Behind the search box (wide photo works best)', data.hero.url, data.hero.source, false);
+    list.slice(0, shown).forEach(function (it) { html += cardHtml(it.key, it.name, it.region, it.url, it.source, false); });
+    grid.innerHTML = html || '<p class="empty">No packages match.</p>';
+    more.hidden = list.length <= shown;
+  }
+  q.addEventListener('input', function () { shown = 36; render(); });
+  only.addEventListener('change', function () { shown = 36; render(); });
+  more.addEventListener('click', function () { shown += 36; render(); });
+
+  grid.addEventListener('change', function (e) {
+    var inp = e.target; if (!inp.classList.contains('ph-file') || !inp.files[0]) return;
+    var card = inp.closest('.ph-card'), key = card.getAttribute('data-key');
+    card.classList.add('is-busy'); say('Uploading…');
+    send(key, inp.files[0]).then(function (j) { apply(key, j); say('Saved. The new image is live on the website.'); render(); })
+      .catch(function (err) { card.classList.remove('is-busy'); say(err.message, true); });
+  });
+  grid.addEventListener('click', function (e) {
+    var b = e.target.closest('.ph-del'); if (!b) return;
+    var card = b.closest('.ph-card'), key = card.getAttribute('data-key');
+    if (!confirm('Remove your uploaded image for this item?')) return;
+    card.classList.add('is-busy');
+    fetch('/api/admin/photos/' + encodeURIComponent(key), { method: 'DELETE', credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } })
+      .then(function (r) { if (!r.ok) throw new Error('Could not remove the image.'); return load(); })
+      .then(function () { say('Removed.'); })
+      .catch(function (err) { card.classList.remove('is-busy'); say(err.message, true); });
+  });
+
+  bulk.addEventListener('change', function () {
+    var files = Array.prototype.slice.call(bulk.files); bulk.value = '';
+    if (!files.length || !data) return;
+    var keys = {}; data.items.forEach(function (it) { keys[it.key] = 1; }); keys.logo = 1; keys.hero = 1;
+    var ok = 0, skipped = [], failed = [];
+    var chain = Promise.resolve();
+    files.forEach(function (f, i) {
+      chain = chain.then(function () {
+        var key = norm(f.name);
+        if (!keys[key]) { skipped.push(f.name); return; }
+        say('Uploading ' + (i + 1) + ' of ' + files.length + '…');
+        return send(key, f).then(function (j) { apply(key, j); ok++; }).catch(function (e) { failed.push(f.name + ' (' + e.message + ')'); });
+      });
+    });
+    chain.then(function () {
+      render();
+      var t = ok + ' uploaded.';
+      if (skipped.length) t += ' No matching package for: ' + skipped.slice(0, 8).join(', ') + (skipped.length > 8 ? '…' : '') + '.';
+      if (failed.length) t += ' Failed: ' + failed.join('; ') + '.';
+      say(t, !ok && (skipped.length || failed.length));
+    });
+  });
+})();
+</script>
+</body>
+</html>

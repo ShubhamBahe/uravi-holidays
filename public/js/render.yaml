@@ -1,0 +1,23 @@
+# One-click deploy on Render: New + > Blueprint > pick your repository.
+# A persistent disk keeps the database and uploaded photos between deploys (Render only offers disks on paid instance types).
+services:
+  - type: web
+    name: uravi-holidays
+    runtime: docker
+    plan: starter
+    healthCheckPath: /healthz
+    disk:
+      name: uravi-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /data
+      - key: TRUST_PROXY
+        value: "1"
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true

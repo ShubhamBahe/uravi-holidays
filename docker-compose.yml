@@ -1,0 +1,32 @@
+# Run on any VPS with Docker:  docker compose up -d --build
+# Caddy in front of the app gets and renews the HTTPS certificate for $DOMAIN automatically.
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      DATA_DIR: /data
+    volumes:
+      - uravi-data:/data
+    expose:
+      - "3000"
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+volumes:
+  uravi-data:
+  caddy-data:
+  caddy-config:

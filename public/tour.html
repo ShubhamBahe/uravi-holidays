@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tour Packages | Uravi Holidays</title>
+<meta name="description" content="Tour packages by Uravi Holidays, Nagpur.">
+<link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+<main>
+<section class="page-title"><div class="container">
+  <h1 id="pageH1">Tour Packages</h1>
+  <div class="title-line" aria-hidden="true"><span></span><span></span><span></span></div>
+  <ol class="breadcrumb" id="crumbs"><li><a href="/index.php">Home</a></li><li aria-current="page">Tour Packages</li></ol>
+</div></section>
+  <div class="container layout">
+    <aside class="sidebar">
+      <h3 class="sidebar__title">Suggested Packages</h3>
+      <ul class="suggest" id="suggest"></ul>
+    </aside>
+    <section class="content">
+      <div class="intro">
+        <h2 id="introTitle">Tour Packages</h2>
+        <p class="intro__tag" id="introTag"></p>
+        <p id="introText"></p>
+      </div>
+      <div class="toolbar" id="toolbar" hidden>
+        <div class="chips" id="chips"></div>
+        <input type="search" id="filterBox" placeholder="Filter packages…" aria-label="Filter packages">
+      </div>
+      <div class="cards" id="tourCards" aria-live="polite"><p class="empty">Loading…</p></div>
+    </section>
+  </div>
+  <div class="cta-wrap"><a class="btn btn--red" href="https://api.whatsapp.com/send?phone=918329056457&text=Hi" target="_blank" rel="noopener">Book Now</a></div>
+</main>
+<div id="site-footer"></div>
+<script src="/js/common.js"></script>
+<script src="/js/uravi-site.js"></script>
+<script src="/js/listing.js"></script>
+</body>
+</html>

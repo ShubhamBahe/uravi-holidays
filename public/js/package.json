@@ -1,0 +1,15 @@
+{
+  "name": "uravi-holidays",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Uravi Holidays website with Express + SQLite backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "test": "node --disable-warning=ExperimentalWarning test/smoke.js",
+    "db:init": "node --disable-warning=ExperimentalWarning scripts/init-db.js",
+    "db:backup": "node --disable-warning=ExperimentalWarning scripts/backup.js"
+  },
+  "engines": { "node": ">=22.13" },
+  "dependencies": { "express": "^4.21.2" }
+}
