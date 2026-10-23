@@ -312,3 +312,18 @@ h1, h2, h3, h4, h5 { margin: 0 0 .5rem; line-height: 1.25; }
 .lightbox p { margin: 0; color: #fff; } .lightbox a { color: #fff; text-decoration: underline; }
 .lightbox__x { position: absolute; top: 12px; right: 18px; font-size: 38px; line-height: 1; background: none; border: 0; color: #fff; cursor: pointer; }
 .topbar__admin { opacity: .85; }
+
+/* ===== Mobile / iPhone polish ===== */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+a, button { -webkit-tap-highlight-color: transparent; }
+.btn { box-sizing: border-box; line-height: 1.4; text-align: center; text-decoration: none; -webkit-appearance: none; appearance: none; }
+.btn--ghost { padding: 8px 22px; }                      /* same height as the filled button next to it (border included) */
+.btn--sm.btn--ghost { padding: 4px 14px; }
+.cta-wrap { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; }
+@media (max-width: 575px) {
+  .cta-wrap .btn { min-width: 230px; }                  /* stacked buttons get one equal width */
+  input, select, textarea { font-size: 16px !important; }   /* stops iPhone Safari zooming in when a field is tapped */
+  .hero__search input, .form input, .form select, .form textarea { -webkit-appearance: none; appearance: none; }
+  .card__foot { flex-wrap: wrap; }
+  .card__actions { justify-content: flex-start; }
+}
