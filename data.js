@@ -11,7 +11,7 @@ const SITE = {
   whatsapp: '918329056457',
   email: 'infouraviholidays@gmail.com',
   website: 'URAVIHolidays.in',
-  url: 'https://uraviholidays.in',
+  url: 'https://www.uraviholidays.in',
   contactPerson: { name: 'Shankartaj Gaikwad', role: 'Travel Consultant' },
   address: {
     lines: ['Imperial Plaza, Trenton Business Centre, 5th Floor,', 'Block No. 5, Somwar Bazar Road,', 'Bardi, Nagpur'],

@@ -19,6 +19,11 @@ const srv = app.listen(0, async () => {
       const r = await get(p); ok(r.status === 200, p + ' -> ' + r.status);
     }
     ok((await get('/1/index.php')).status === 301, '/1/index.php redirect');
+    for (const p of ['/gallery', '/gallery/', '/robots.txt', '/sitemap.xml', '/api/gallery']) { const r = await get(p); ok(r.status === 200, p + ' -> ' + r.status); }
+    ok((await get('/gallery.php')).status === 301 && (await get('/gallery.php')).headers.get('location') === '/gallery', 'gallery.php redirect');
+    ok((await get('/about-us')).status === 301, 'old about-us redirect');
+    ok(/Sitemap:/.test(await (await get('/robots.txt')).text()), 'robots has sitemap');
+    ok(/<loc>.*\/gallery<\/loc>/.test(await (await get('/sitemap.xml')).text()), 'sitemap has gallery');
     ok((await get('/nope.php')).status === 404, 'unknown php 404');
     ok((await get('/api/nope')).status === 404, 'unknown api 404');
 

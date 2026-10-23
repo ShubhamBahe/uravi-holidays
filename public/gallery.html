@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photo Gallery | Uravi Holidays, Nagpur</title>
+<meta name="description" content="Photo gallery of tour destinations, jungle safaris and day trips from Uravi Holidays, Nagpur.">
+<link rel="canonical" href="https://www.uraviholidays.in/gallery">
+<link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="site-header"></div>
+<main>
+<section class="page-title"><div class="container">
+  <h1>Photo Gallery</h1>
+  <div class="title-line" aria-hidden="true"><span></span><span></span><span></span></div>
+  <ol class="breadcrumb"><li><a href="/index.php">Home</a></li><li aria-current="page">Gallery</li></ol>
+</div></section>
+<div class="container gallery-wrap">
+  <div class="toolbar" id="gTools" hidden><div class="chips" id="gChips"></div></div>
+  <div class="gallery" id="gGrid" aria-live="polite"><p class="empty">Loading…</p></div>
+  <div class="cta-wrap"><a class="btn" href="/customized-holidays.php">Plan my trip</a></div>
+</div>
+</main>
+<div class="lightbox" id="lb" hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button type="button" class="lightbox__x" id="lbX" aria-label="Close">&times;</button>
+  <img id="lbImg" alt=""><p id="lbCap"></p>
+</div>
+<div id="site-footer"></div>
+<script src="/js/common.js"></script>
+<script src="/js/uravi-site.js"></script>
+<script src="/js/gallery.js"></script>
+</body>
+</html>

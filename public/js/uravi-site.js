@@ -103,7 +103,7 @@
     var links = [['Home', '/index.php'], ['Domestic Tours', '/india-tour-packages.php'], ['International Tours', '/world-tour-packages.php'],
       ['Jungle Safari', '/main-jungle-safari.php'], ['Day Tours from Nagpur', '/main-one-day-tour.php'], ['Our Services', '/services.php'],
       ['Customized Holidays', '/customized-holidays.php'], ['Corporate Travel', '/corporate-travel.php'],
-      ['Contact Us', '/contact.php'], ['Privacy Policy', '/privacy-policy.php']];
+      ['Gallery', '/gallery'], ['Contact Us', '/contact.php'], ['Privacy Policy', '/privacy-policy.php']];
     f.innerHTML = '<footer class="footer" data-uravi-footer><div class="container footer__grid">' +
       '<div><h4>' + esc(site.name) + '</h4><p>' + esc(site.tagline) + '</p><p><em>' + esc(site.slogan) + '</em></p>' + socials('social--footer') + '</div>' +
       '<div><h4>Quick Links</h4>' + links.map(function (l) { return '<p><a href="' + l[1] + '">' + l[0] + '</a></p>'; }).join('') + '</div>' +

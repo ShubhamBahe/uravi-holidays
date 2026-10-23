@@ -79,6 +79,14 @@ if (process.env.FORCE_HTTPS === '1') {
     res.redirect(301, 'https://' + req.get('host') + req.originalUrl);
   });
 }
+// One address only: uraviholidays.in -> www.uraviholidays.in (otherwise Google sees two copies of every page).
+if (process.env.NODE_ENV === 'production') {
+  const canon = (() => { try { return new URL(process.env.SITE_URL || D.SITE.url).host; } catch (e) { return ''; } })();
+  app.use((req, res, next) => {
+    if (canon && req.hostname === canon.replace(/^www\./, '') && req.hostname !== canon) return res.redirect(301, 'https://' + canon + req.originalUrl);
+    next();
+  });
+}
 app.disable('x-powered-by');
 app.use(function (req, res, next) {
   res.set({ 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'SAMEORIGIN', 'Referrer-Policy': 'strict-origin-when-cross-origin' });
@@ -181,6 +189,12 @@ app.get('/api/featured', (req, res) => {
     tours: D.items.filter(i => i.kind === 'tour').slice(0, 6).map(card),
     destinations: pick.map(s => D.bySlug[s]).filter(Boolean).map(card)
   });
+});
+
+app.get('/api/gallery', (req, res) => {          // every package that has a real photo (uploaded or committed)
+  const photos = D.items.filter(it => IMG.sourceOf(it) !== 'illustration')
+    .map(it => ({ name: it.name, region: it.region, href: '/' + it.file, img: IMG.imgFor(it) }));
+  res.set('Cache-Control', 'public, max-age=60').json({ photos });
 });
 
 app.get('/api/suggested', (req, res) =>
@@ -318,7 +332,7 @@ app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 
 /* ---------- only the website's own scripts are public ---------- */
 // Without this, any stray file under public/js (server code, data/uravi.db, admin-password.txt ...) could be downloaded by anyone.
-const PUBLIC_JS = ['common.js', 'home.js', 'listing.js', 'detail.js', 'admin.js', 'uravi-site.js'];
+const PUBLIC_JS = ['common.js', 'home.js', 'listing.js', 'detail.js', 'admin.js', 'uravi-site.js', 'gallery.js'];
 app.use('/js', (req, res, next) => PUBLIC_JS.includes(req.path.slice(1)) ? next() : res.status(404).sendFile(path.join(PUB, '404.html')));
 
 /* ---------- leftover old branding safety net ---------- */
@@ -350,8 +364,43 @@ const PAGES = {
   'main-one-day-tour.php': 'tour.html', 'main-jungle-safari.php': 'tour.html', 'india-tour-packages.php': 'tour.html',
   'world-tour-packages.php': 'tour.html', 'search.php': 'tour.html',
   'customized-holidays.php': 'enquiry.html', 'corporate-travel.php': 'enquiry.html',
-  'services.php': 'services.html', 'our-services.php': 'services.html', 'service.php': 'services.html'
+  'services.php': 'services.html', 'our-services.php': 'services.html', 'service.php': 'services.html', 'gallery.php': 'gallery.html'
 };
+/* ---------- search engines: robots.txt, sitemap.xml, old URLs ---------- */
+const BASE = (process.env.SITE_URL || D.SITE.url || '').replace(/\/+$/, '');
+app.get('/robots.txt', (req, res) => res.type('text/plain').send(
+  'User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: ' + BASE + '/sitemap.xml\n'));
+app.get('/sitemap.xml', (req, res) => {
+  const base = BASE || (req.protocol + '://' + req.get('host'));
+  const urls = ['/', '/gallery', '/india-tour-packages.php', '/world-tour-packages.php', '/main-jungle-safari.php', '/main-one-day-tour.php',
+    '/customized-holidays.php', '/corporate-travel.php', '/services.php', '/contact.php', '/privacy-policy.php'].concat(D.items.map(i => '/' + i.file));
+  res.type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    urls.map(u => '<url><loc>' + base + u.replace(/&/g, '&amp;') + '</loc></url>').join('\n') + '\n</urlset>');
+});
+// Addresses that Google or old links may still use (old website versions). Each one is sent permanently (301) to the matching page.
+const OLD_URLS = {
+  '/index.html': '/', '/home': '/', '/index': '/',
+  '/gallery.php': '/gallery', '/gallery.html': '/gallery', '/photos': '/gallery', '/photo-gallery': '/gallery', '/gallery/index.php': '/gallery',
+  '/contact': '/contact.php', '/contact-us': '/contact.php', '/contact-us.php': '/contact.php', '/contactus': '/contact.php', '/contactus.php': '/contact.php',
+  '/about': '/contact.php', '/about-us': '/contact.php', '/about-us.php': '/contact.php', '/aboutus.php': '/contact.php',
+  '/services': '/services.php', '/our-services': '/services.php',
+  '/privacy-policy': '/privacy-policy.php', '/privacy': '/privacy-policy.php',
+  '/india': '/india-tour-packages.php', '/domestic': '/india-tour-packages.php', '/domestic-tour-packages.php': '/india-tour-packages.php',
+  '/india-tour-packages': '/india-tour-packages.php', '/tour-packages': '/india-tour-packages.php', '/packages': '/india-tour-packages.php',
+  '/world': '/world-tour-packages.php', '/international': '/world-tour-packages.php', '/international-tour-packages.php': '/world-tour-packages.php',
+  '/world-tour-packages': '/world-tour-packages.php',
+  '/jungle-safari': '/main-jungle-safari.php', '/jungle-safari.php': '/main-jungle-safari.php',
+  '/one-day-tour': '/main-one-day-tour.php', '/day-tours': '/main-one-day-tour.php',
+  '/customized-holidays': '/customized-holidays.php', '/corporate-travel': '/corporate-travel.php', '/enquiry': '/customized-holidays.php'
+};
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  const key = req.path.toLowerCase().replace(/\/+$/, '') || '/';
+  const to = OLD_URLS[key];
+  if (to && to !== key) return res.redirect(301, to + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''));
+  next();
+});
+app.get('/gallery', send('gallery.html'));
 app.get('/', send('index.html'));
 app.get('/admin', send('admin.html'));
 app.get('/1/index.php', (req, res) => res.redirect(301, '/customized-holidays.php'));

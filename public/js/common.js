@@ -46,6 +46,7 @@
         '<li class="nav__item"><a class="nav__link" data-file="customized-holidays.php" href="/customized-holidays.php">Customized Holidays</a></li>' +
         '<li class="nav__item"><a class="nav__link" data-file="corporate-travel.php" href="/corporate-travel.php">Corporate Travel</a></li>' +
         '<li class="nav__item"><a class="nav__link" data-file="services.php" href="/services.php">Services</a></li>' +
+        '<li class="nav__item"><a class="nav__link" data-file="gallery" href="/gallery">Gallery</a></li>' +
         '<li class="nav__item"><a class="nav__link" data-file="contact.php" href="/contact.php">Contact us</a></li>' +
       '</ul></nav>' +
     '</div></header>';
