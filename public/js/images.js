@@ -105,10 +105,42 @@ function uploadedPhoto(key) {
   }
   return null;
 }
-function logoFile() {
-  for (const e of EXTS) { const f = path.join(UPLOAD_DIR, 'logo.' + e); if (fs.existsSync(f)) return f; }
-  for (const e of EXTS.concat('svg')) { const f = path.join(PUB, 'images', 'logo.' + e); if (fs.existsSync(f)) return f; }
+/* Finds "<name>.<ext>" in a folder ignoring upper/lower case, so LOGO.png works on Linux hosts as well as Windows. */
+function findCI(dir, names, exts) {
+  let files; try { files = fs.readdirSync(dir); } catch (e) { return null; }
+  for (const n of names) for (const e of exts) {
+    const hit = files.find(f => f.toLowerCase() === n + '.' + e);
+    if (hit) return path.join(dir, hit);
+  }
   return null;
+}
+/* Order: 1) what the admin uploaded  2) a logo/hero file you committed in public/images (any capitalisation)  3) built-in illustration */
+function logoFile() {
+  return findCI(UPLOAD_DIR, ['logo'], EXTS) || findCI(path.join(PUB, 'images'), ['logo'], EXTS.concat('svg'));
+}
+function heroFile() {
+  return findCI(UPLOAD_DIR, ['hero'], EXTS) || findCI(path.join(PUB, 'images'), ['hero'], EXTS);
+}
+function hero() {   // default home page background: a sunset over sea and mountains with a plane
+  const waves = [0, 1, 2, 3, 4, 5].map(i => `<path d="M0 ${452 + i * 26} q50 -14 100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0" stroke="#fff" stroke-opacity="${(0.22 - i * 0.025).toFixed(3)}" fill="none" stroke-width="3"/>`).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Travel scene">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b3b3a"/><stop offset=".45" stop-color="#12807d"/><stop offset=".78" stop-color="#f0b45c"/><stop offset="1" stop-color="#ffd99a"/></linearGradient>
+<linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a9b96"/><stop offset="1" stop-color="#0a4a48"/></linearGradient>
+<radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff3d1" stop-opacity=".95"/><stop offset="1" stop-color="#fff3d1" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1600" height="600" fill="url(#sky)"/>
+<circle cx="1180" cy="420" r="230" fill="url(#glow)"/><circle cx="1180" cy="420" r="80" fill="#fff0c4"/>
+<ellipse cx="260" cy="130" rx="150" ry="22" fill="#fff" opacity=".10"/><ellipse cx="420" cy="165" rx="110" ry="16" fill="#fff" opacity=".08"/><ellipse cx="1380" cy="110" rx="170" ry="24" fill="#fff" opacity=".09"/>
+<path d="M0 430 L120 350 L230 405 L360 310 L520 410 L640 360 L760 430 L900 450 H0Z" fill="#0e5f5c" opacity=".75"/>
+<path d="M880 450 L1010 380 L1100 420 L1230 345 L1380 415 L1480 372 L1600 430 V450 H880Z" fill="#0e5f5c" opacity=".7"/>
+<path d="M0 450 L160 395 L300 440 L470 385 L620 450Z" fill="#0a3f3d"/><path d="M1000 450 L1180 400 L1320 445 L1450 405 L1600 450Z" fill="#0a3f3d"/>
+<rect y="448" width="1600" height="152" fill="url(#sea)"/>
+<path d="M1120 452 h120 M1090 470 h180 M1060 492 h240 M1030 518 h300" stroke="#fff3d1" stroke-opacity=".5" stroke-width="5" stroke-linecap="round"/>
+${waves}
+<path d="M120 250 C 360 220, 560 130, 760 110" stroke="#fff" stroke-opacity=".5" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round" fill="none"/>
+<g transform="translate(790 100) rotate(-12)" fill="#fff"><path d="M0 0 L60 -8 L92 0 L60 8Z"/><path d="M30 -2 L52 -34 L62 -34 L52 -2Z"/><path d="M30 2 L52 34 L62 34 L52 2Z"/><path d="M6 0 L0 -14 L10 -14 L18 0Z"/></g>
+</svg>`;
 }
 function sourceOf(item) { return uploadedPhoto(item.imgKey) ? 'upload' : photoFor(item) ? 'file' : 'illustration'; }
 function photoFor(item) {
@@ -129,4 +161,4 @@ function favicon() {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#12807d"/><path d="M14 34 q18 -8 36 0 M14 42 q18 -6 36 0" stroke="#c8922b" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M40 12 l12 4 -9 8 -3 8 -3 -7 -6 -2z" fill="#fff"/></svg>`;
 }
 
-module.exports = { svg, imgFor, logo, favicon, UPLOAD_DIR, EXTS, uploadedPhoto, logoFile, sourceOf };
+module.exports = { svg, imgFor, logo, favicon, hero, heroFile, UPLOAD_DIR, EXTS, uploadedPhoto, logoFile, sourceOf };

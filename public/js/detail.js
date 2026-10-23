@@ -9,7 +9,7 @@
     document.title = it.name + ' | Uravi Holidays';
     var md = document.querySelector('meta[name=description]'); if (md) md.content = it.name + ' - ' + it.tagline;
     A.$('#pageH1').textContent = it.name;
-    var parent = listFor[it.kind] || (it.scope === 'world' ? ['/world-tour-packages.php', 'World Tours'] : ['/india-tour-packages.php', 'India Tours']);
+    var parent = listFor[it.kind] || (it.scope === 'world' ? ['/world-tour-packages.php', 'International Tours'] : ['/india-tour-packages.php', 'Domestic Tours']);
     A.$('#crumbs').innerHTML = '<li><a href="/index.php">Home</a></li><li><a href="' + parent[0] + '">' + parent[1] + '</a></li><li aria-current="page">' + esc(it.name) + '</li>';
 
     root.innerHTML =

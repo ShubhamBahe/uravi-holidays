@@ -32,14 +32,15 @@
       '<ul class="social">' +
         '<li><a href="mailto:infouraviholidays@gmail.com" aria-label="Email"><i class="fa fa-envelope"></i></a></li>' +
         '<li><a href="' + WA + 'Hi" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fa fa-whatsapp"></i></a></li>' +
+        '<li><a class="topbar__admin" href="/admin" aria-label="Admin login" title="Admin login"><i class="fa fa-lock"></i></a></li>' +
       '</ul>' +
     '</div></div>' +
     '<header class="header"><div class="container header__inner">' +
       '<a class="logo" href="/index.php"><img src="/images/logo.svg" alt="Uravi Holidays" height="48"></a>' +
       '<button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav"><i class="fa fa-bars"></i></button>' +
       '<nav class="nav" id="mainNav" aria-label="Main"><ul class="nav__list">' +
-        '<li class="nav__item has-mega"><button class="nav__link" aria-expanded="false">India <i class="fa fa-angle-down"></i></button><div class="mega" id="megaIndia"></div></li>' +
-        '<li class="nav__item has-mega"><button class="nav__link" aria-expanded="false">World <i class="fa fa-angle-down"></i></button><div class="mega" id="megaWorld"></div></li>' +
+        '<li class="nav__item has-mega"><button class="nav__link" aria-expanded="false">Domestic <i class="fa fa-angle-down"></i></button><div class="mega" id="megaIndia"></div></li>' +
+        '<li class="nav__item has-mega"><button class="nav__link" aria-expanded="false">International <i class="fa fa-angle-down"></i></button><div class="mega" id="megaWorld"></div></li>' +
         '<li class="nav__item"><a class="nav__link" data-file="main-jungle-safari.php" href="/main-jungle-safari.php">Jungle Safari</a></li>' +
         '<li class="nav__item"><a class="nav__link" data-file="main-one-day-tour.php" href="/main-one-day-tour.php">Nagpur Special Tours</a></li>' +
         '<li class="nav__item"><a class="nav__link" data-file="customized-holidays.php" href="/customized-holidays.php">Customized Holidays</a></li>' +
@@ -67,7 +68,7 @@
         '<iframe title="Uravi Holidays on Google Maps" src="https://www.google.com/maps?q=Imperial+Plaza,+Trenton+Business+Centre,+Somwar+Bazar+Road,+Bardi,+Nagpur&output=embed" width="100%" height="180" style="border:0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>' +
         '<p><a href="' + MAPS + '" target="_blank" rel="noopener">Open in Google Maps</a></p></div>' +
     '</div>' +
-    '<div class="copyright"><div class="container"><p>© <span id="year">2026</span> Uravi Holidays. All rights reserved.</p></div></div>' +
+    '<div class="copyright"><div class="container"><p>© <span id="year">2026</span> Uravi Holidays. All rights reserved. · <a href="/admin"><i class="fa fa-lock"></i> Admin Login</a></p></div></div>' +
     '</footer>' +
     '<a class="whatsapp" href="' + WA + 'Hi" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><i class="fa fa-whatsapp"></i></a>';
 

@@ -145,10 +145,10 @@ const LISTINGS = {
   'main-jungle-safari.php': { title: 'Jungle Safari Packages', tag: 'Meet the wild, close to home.',
     text: 'Central India is home to some of the finest tiger reserves in the country. Choose a safari package from Nagpur and let us take care of the stay, jeep safari and transfers.',
     pick: () => D.items.filter(i => i.kind === 'safari').concat([D.bySlug['bandhavgarh']]) },
-  'india-tour-packages.php': { title: 'India Tour Packages', tag: 'From the Himalayas to the backwaters.',
+  'india-tour-packages.php': { title: 'Domestic Tour Packages', tag: 'From the Himalayas to the backwaters.',
     text: 'Browse our domestic holidays across North, South, East, West and Central India.', filters: true,
     pick: () => D.items.filter(i => i.scope === 'india') },
-  'world-tour-packages.php': { title: 'World Tour Packages', tag: 'Over 1000 tour packages worldwide.',
+  'world-tour-packages.php': { title: 'International Tour Packages', tag: 'Over 1000 tour packages worldwide.',
     text: 'Explore international holidays across Asia, Europe, the Middle East, Africa, the Americas and Australia.', filters: true,
     pick: () => D.items.filter(i => i.scope === 'world') }
 };
@@ -283,9 +283,14 @@ const upFile = (key, ext) => SPECIAL.includes(key) ? path.join(IMG.UPLOAD_DIR, k
 function clearUploads(key) { IMG.EXTS.forEach(e => { try { fs.unlinkSync(upFile(key, e)); } catch (_) { /* not there */ } }); }
 function photoUrl(key) { return key === 'logo' ? '/images/logo.svg?v=' + Date.now() : key === 'hero' ? '/img/hero-scene.svg?v=' + Date.now() : IMG.imgFor(itemByKey(key)); }
 
+// Uploads are files in DATA_DIR. On hosts without a persistent disk (Render free, Heroku, Vercel...) they are wiped on every
+// restart/redeploy, which looks like "my changes reset". Tell the admin when we suspect that.
+const STORAGE_WARNING = process.env.NODE_ENV === 'production' && !process.env.DATA_DIR && !process.env.UPLOAD_DIR
+  ? 'DATA_DIR is not set, so uploaded photos and the logo are stored inside the app folder and will be lost when the host restarts or redeploys. Attach a persistent disk and set DATA_DIR to it (see DEPLOY.md).' : '';
 app.get('/api/admin/photos', requireAdmin, (req, res) => {
   const f = IMG.logoFile();
   res.json({
+    storageWarning: STORAGE_WARNING,
     logo: { url: '/images/logo.svg?v=' + Date.now(), source: f && f.startsWith(IMG.UPLOAD_DIR) ? 'upload' : f ? 'file' : 'illustration' },
     hero: { url: '/img/hero-scene.svg?v=' + Date.now(), source: (h => h && h.startsWith(IMG.UPLOAD_DIR) ? 'upload' : h ? 'file' : 'illustration')(IMG.heroFile()) },
     items: D.items.map(it => ({ key: it.imgKey, name: it.name, region: it.region, kind: it.kind, url: IMG.imgFor(it), source: IMG.sourceOf(it) }))
@@ -310,6 +315,11 @@ app.delete('/api/admin/photos/:key', requireAdmin, (req, res) => {
 });
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
+
+/* ---------- only the website's own scripts are public ---------- */
+// Without this, any stray file under public/js (server code, data/uravi.db, admin-password.txt ...) could be downloaded by anyone.
+const PUBLIC_JS = ['common.js', 'home.js', 'listing.js', 'detail.js', 'admin.js', 'uravi-site.js'];
+app.use('/js', (req, res, next) => PUBLIC_JS.includes(req.path.slice(1)) ? next() : res.status(404).sendFile(path.join(PUB, '404.html')));
 
 /* ---------- leftover old branding safety net ---------- */
 app.use(require('./rebrand')(PUB));

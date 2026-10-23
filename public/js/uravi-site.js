@@ -100,7 +100,7 @@
     var a = site.address || {}, ph = (site.phones || [site.phone]).map(function (p) {
       return '<a href="tel:' + esc(digits(p)) + '">' + esc(p) + '</a>';
     }).join('<br>');
-    var links = [['Home', '/index.php'], ['India Tours', '/india-tour-packages.php'], ['World Tours', '/world-tour-packages.php'],
+    var links = [['Home', '/index.php'], ['Domestic Tours', '/india-tour-packages.php'], ['International Tours', '/world-tour-packages.php'],
       ['Jungle Safari', '/main-jungle-safari.php'], ['Day Tours from Nagpur', '/main-one-day-tour.php'], ['Our Services', '/services.php'],
       ['Customized Holidays', '/customized-holidays.php'], ['Corporate Travel', '/corporate-travel.php'],
       ['Contact Us', '/contact.php'], ['Privacy Policy', '/privacy-policy.php']];
@@ -113,7 +113,7 @@
       '<p><i class="fa fa-phone"></i> ' + ph + '</p>' +
       '<p><i class="fa fa-envelope"></i> <a href="mailto:' + esc(site.email) + '">' + esc(site.email) + '</a></p>' +
       '<p><i class="fa fa-globe"></i> ' + esc(site.website) + '</p></div>' +
-      '</div><div class="copyright"><p>&copy; ' + new Date().getFullYear() + ' ' + esc(site.name) + '. All rights reserved.</p></div></footer>';
+      '</div><div class="copyright"><p>&copy; ' + new Date().getFullYear() + ' ' + esc(site.name) + '. All rights reserved. &middot; <a href="/admin"><i class="fa fa-lock"></i> Admin Login</a></p></div></footer>';
   }
   function whatsapp() {
     document.querySelectorAll('a.whatsapp').forEach(function (a) { a.href = 'https://api.whatsapp.com/send?phone=' + site.whatsapp + '&text=Hi'; });

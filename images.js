@@ -105,15 +105,21 @@ function uploadedPhoto(key) {
   }
   return null;
 }
-function logoFile() {
-  for (const e of EXTS) { const f = path.join(UPLOAD_DIR, 'logo.' + e); if (fs.existsSync(f)) return f; }
-  for (const e of EXTS.concat('svg')) { const f = path.join(PUB, 'images', 'logo.' + e); if (fs.existsSync(f)) return f; }
+/* Finds "<name>.<ext>" in a folder ignoring upper/lower case, so LOGO.png works on Linux hosts as well as Windows. */
+function findCI(dir, names, exts) {
+  let files; try { files = fs.readdirSync(dir); } catch (e) { return null; }
+  for (const n of names) for (const e of exts) {
+    const hit = files.find(f => f.toLowerCase() === n + '.' + e);
+    if (hit) return path.join(dir, hit);
+  }
   return null;
 }
+/* Order: 1) what the admin uploaded  2) a logo/hero file you committed in public/images (any capitalisation)  3) built-in illustration */
+function logoFile() {
+  return findCI(UPLOAD_DIR, ['logo'], EXTS) || findCI(path.join(PUB, 'images'), ['logo'], EXTS.concat('svg'));
+}
 function heroFile() {
-  for (const e of EXTS) { const f = path.join(UPLOAD_DIR, 'hero.' + e); if (fs.existsSync(f)) return f; }
-  for (const e of EXTS) { const f = path.join(PUB, 'images', 'hero.' + e); if (fs.existsSync(f)) return f; }
-  return null;
+  return findCI(UPLOAD_DIR, ['hero'], EXTS) || findCI(path.join(PUB, 'images'), ['hero'], EXTS);
 }
 function hero() {   // default home page background: a sunset over sea and mountains with a plane
   const waves = [0, 1, 2, 3, 4, 5].map(i => `<path d="M0 ${452 + i * 26} q50 -14 100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0" stroke="#fff" stroke-opacity="${(0.22 - i * 0.025).toFixed(3)}" fill="none" stroke-width="3"/>`).join('');

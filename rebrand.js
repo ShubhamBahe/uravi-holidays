@@ -19,6 +19,12 @@ function rebrand(s, isJs) {
     .replace(new RegExp('(tel:\\s*)(?:\\+?91)?[\\s-]*' + OLD, 'gi'), '$1+' + PHONE_PLAIN)
     .replace(new RegExp('((?:wa\\.me/|phone=)\\+?)(?:91)?' + OLD, 'gi'), '$1' + PHONE_PLAIN)
     .replace(new RegExp('(?:\\+?91[\\s-]*)?' + OLD, 'g'), PHONE_SHOW);
+  // menu labels: India -> Domestic, World -> International (safety net in case an older common.js is still deployed)
+  s = s.replace(/(aria-expanded="false">)India( <i class="fa fa-angle-down")/g, '$1Domestic$2')
+       .replace(/(aria-expanded="false">)World( <i class="fa fa-angle-down")/g, '$1International$2')
+       .replace(/>India<\/a><a href="\/world-tour-packages\.php">World</g, '>Domestic</a><a href="/world-tour-packages.php">International<')
+       .replace(/>India packages</g, '>Domestic packages<').replace(/>World packages</g, '>International packages<')
+       .replace(/'India Tours'/g, "'Domestic Tours'").replace(/'World Tours'/g, "'International Tours'");
   if (!isJs) s = s.replace(new RegExp(NOT_IN_WORD + 'AVM' + NOT_BEFORE, 'g'), NAME);
   return s;
 }
@@ -28,7 +34,7 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.htm': 'text/html; charset
 module.exports = function (PUB) {
   const sendBranded = (res, file) => {
     const ext = path.extname(file).toLowerCase();
-    res.set('Content-Type', TYPES[ext]).send(rebrand(fs.readFileSync(file, 'utf8'), ext === '.js'));
+    res.set({ 'Content-Type': TYPES[ext], 'Cache-Control': 'no-cache' }).send(rebrand(fs.readFileSync(file, 'utf8'), ext === '.js'));
   };
   return function (req, res, next) {
     const orig = res.sendFile.bind(res);
