@@ -327,3 +327,28 @@ a, button { -webkit-tap-highlight-color: transparent; }
   .card__foot { flex-wrap: wrap; }
   .card__actions { justify-content: flex-start; }
 }
+
+/* ===== Phone layout (v2): compact top bar, bigger icons, hero text no longer hidden behind the plane ===== */
+.social a { width: 36px; height: 36px; font-size: 17px; }
+.social a i { font-size: 17px; line-height: 1; }
+.nav-toggle { width: 46px; height: 46px; display: none; align-items: center; justify-content: center; font-size: 28px; border-radius: 10px; }
+@media (max-width: 991px) { .nav-toggle { display: inline-flex; } }
+@media (max-width: 767px) {
+  .topbar { font-size: 13.5px; }
+  /* address and phones stack on the left, the three round icons sit in the empty space on the right of the last row */
+  .topbar__inner { flex-wrap: nowrap; align-items: flex-end; gap: 10px; padding-block: 10px; }
+  .topbar__info { flex: 1 1 auto; min-width: 0; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .topbar__info a { display: inline-flex; align-items: center; gap: 6px; padding: 2px 0; }
+  .social { flex: 0 0 auto; gap: 8px; }
+  .social a { width: 42px; height: 42px; }
+  .social a i { font-size: 20px; }
+  .header__inner { min-height: 64px; }
+  .logo img { height: 58px; }
+  .hero { padding: 40px 0 36px; background-position: 30% center; }
+  .hero h1 { font-size: 2.1rem; }
+  .hero p { font-size: 15px; }
+  .hero__links { gap: 8px; }
+  .hero__links a { padding: 9px 16px; }
+  .whatsapp { width: 54px; height: 54px; }
+}
+@media (max-width: 360px) { .social a { width: 38px; height: 38px; } .social { gap: 6px; } }

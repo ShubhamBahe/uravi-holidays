@@ -1,0 +1,5 @@
+Run once in Git Bash (or VS Code terminal) from your project folder, to remove leftover duplicate files from your GitHub repo:
+
+cd public/js && ls -A | grep -vE '^(common|home|listing|detail|admin|uravi-site|gallery)\.js$' | xargs rm -rf && cd ../..
+rm -f uravi-site.js README-CHANGES.txt
+git add -A && git commit -m "Permanent image storage, mobile layout, cleanup" && git push

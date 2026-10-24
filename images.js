@@ -98,7 +98,9 @@ const PUB = path.join(__dirname, 'public');
 /* Photos uploaded from the admin page live here (set DATA_DIR / UPLOAD_DIR to a persistent disk on your host). */
 const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.env.DATA_DIR || path.join(__dirname, 'data'), 'uploads');
 const EXTS = ['jpg', 'jpeg', 'png', 'webp'];
+const STORE = require('./storage');
 function uploadedPhoto(key) {
+  const remote = STORE.get(key); if (remote) return remote;
   for (const e of EXTS) {
     const f = path.join(UPLOAD_DIR, 'photos', key + '.' + e);
     if (fs.existsSync(f)) return '/uploads/photos/' + key + '.' + e + '?v=' + Math.floor(fs.statSync(f).mtimeMs);
@@ -109,7 +111,7 @@ function uploadedPhoto(key) {
 function findCI(dir, names, exts) {
   let files; try { files = fs.readdirSync(dir); } catch (e) { return null; }
   for (const n of names) for (const e of exts) {
-    const hit = files.find(f => f.toLowerCase() === n + '.' + e);
+    const hit = files.find(f => f === n + '.' + e) || files.find(f => f.toLowerCase() === n + '.' + e);   // exact name wins
     if (hit) return path.join(dir, hit);
   }
   return null;
@@ -161,4 +163,4 @@ function favicon() {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#12807d"/><path d="M14 34 q18 -8 36 0 M14 42 q18 -6 36 0" stroke="#c8922b" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M40 12 l12 4 -9 8 -3 8 -3 -7 -6 -2z" fill="#fff"/></svg>`;
 }
 
-module.exports = { svg, imgFor, logo, favicon, hero, heroFile, UPLOAD_DIR, EXTS, uploadedPhoto, logoFile, sourceOf };
+module.exports = { STORE, svg, imgFor, logo, favicon, hero, heroFile, UPLOAD_DIR, EXTS, uploadedPhoto, logoFile, sourceOf };

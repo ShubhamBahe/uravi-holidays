@@ -27,6 +27,16 @@
    Caddy fetches and renews the HTTPS certificate by itself. Open `https://your-domain/admin`.
 3. Update later with `git pull && docker compose up -d --build`. Data lives in the `uravi-data` volume and survives.
 
+## Keep admin photos forever (free hosts with no persistent disk)
+Hosts such as Render (free plan), Vercel or Heroku delete every file the site saves when they restart, so photos uploaded
+in the admin panel disappear. Fix it for free with Cloudinary (no credit card):
+1. Sign up at cloudinary.com, open the **Dashboard** and click **API Keys** (or "Go to API Keys").
+2. Copy the line that starts with `CLOUDINARY_URL=cloudinary://...` (the secret is shown after you click the eye icon).
+3. On your host open **Environment** and add a variable named `CLOUDINARY_URL` with that `cloudinary://...` value. Save and redeploy.
+4. In `/admin` > Photos & Logo, upload again. Photos and the logo now live on Cloudinary and survive restarts and redeploys.
+Without `CLOUDINARY_URL` the site keeps using local files, which need a persistent disk (`DATA_DIR`).
+Note: enquiries are stored in the site's own database, which also needs a persistent disk on hosts that wipe files.
+
 ## After it is live
 - `https://your-domain/healthz` shows `{"ok":true}`.
 - Sign in at `/admin`, open **Photos & Logo** and upload your logo and package photos.

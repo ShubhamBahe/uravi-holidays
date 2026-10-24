@@ -299,32 +299,39 @@ function photoUrl(key) { return key === 'logo' ? '/images/logo.svg?v=' + Date.no
 
 // Uploads are files in DATA_DIR. On hosts without a persistent disk (Render free, Heroku, Vercel...) they are wiped on every
 // restart/redeploy, which looks like "my changes reset". Tell the admin when we suspect that.
-const STORAGE_WARNING = process.env.NODE_ENV === 'production' && !process.env.DATA_DIR && !process.env.UPLOAD_DIR
-  ? 'DATA_DIR is not set, so uploaded photos and the logo are stored inside the app folder and will be lost when the host restarts or redeploys. Attach a persistent disk and set DATA_DIR to it (see DEPLOY.md).' : '';
+const onRootDisk = (() => { try { return fs.statSync(DATA_DIR).dev === fs.statSync('/').dev; } catch (e) { return false; } })();   // not a separate mounted disk
+const STORAGE_WARNING = process.env.NODE_ENV === 'production' && !IMG.STORE.enabled && onRootDisk
+  ? 'Photos uploaded here are stored on a temporary disk and will disappear when the site restarts. Fix: add the CLOUDINARY_URL setting on your host (free, see DEPLOY.md) or attach a persistent disk.' : '';
 app.get('/api/admin/photos', requireAdmin, (req, res) => {
   const f = IMG.logoFile();
   res.json({
     storageWarning: STORAGE_WARNING,
-    logo: { url: '/images/logo.svg?v=' + Date.now(), source: f && f.startsWith(IMG.UPLOAD_DIR) ? 'upload' : f ? 'file' : 'illustration' },
-    hero: { url: '/img/hero-scene.svg?v=' + Date.now(), source: (h => h && h.startsWith(IMG.UPLOAD_DIR) ? 'upload' : h ? 'file' : 'illustration')(IMG.heroFile()) },
+    logo: { url: '/images/logo.svg?v=' + Date.now(), source: IMG.STORE.get('logo') || f && f.startsWith(IMG.UPLOAD_DIR) ? 'upload' : f ? 'file' : 'illustration' },
+    hero: { url: '/img/hero-scene.svg?v=' + Date.now(), source: (h => IMG.STORE.get('hero') || h && h.startsWith(IMG.UPLOAD_DIR) ? 'upload' : h ? 'file' : 'illustration')(IMG.heroFile()) },
     items: D.items.map(it => ({ key: it.imgKey, name: it.name, region: it.region, kind: it.kind, url: IMG.imgFor(it), source: IMG.sourceOf(it) }))
   });
 });
-app.put('/api/admin/photos/:key', requireAdmin, rawImage, (req, res) => {
+app.put('/api/admin/photos/:key', requireAdmin, rawImage, async (req, res, next) => {
   const key = req.params.key;
   if (!validKey(key)) return res.status(404).json({ error: 'Unknown package' });
   const ext = Buffer.isBuffer(req.body) && req.body.length ? sniffImage(req.body) : null;
   if (!ext) return res.status(415).json({ error: 'Please choose a JPG, PNG or WebP image.' });
-  clearUploads(key);
-  const dest = upFile(key, ext);
-  fs.writeFileSync(dest + '.tmp', req.body);
-  fs.renameSync(dest + '.tmp', dest);
+  try {
+    if (IMG.STORE.enabled) { await IMG.STORE.save(key, req.body, { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp' }[ext]); clearUploads(key); }
+    else {
+      clearUploads(key);
+      const dest = upFile(key, ext);
+      fs.writeFileSync(dest + '.tmp', req.body);
+      fs.renameSync(dest + '.tmp', dest);
+    }
+  } catch (e) { console.error(e); return res.status(502).json({ error: 'Could not save the image: ' + e.message }); }
   res.json({ ok: true, key, url: photoUrl(key), source: 'upload' });
 });
-app.delete('/api/admin/photos/:key', requireAdmin, (req, res) => {
+app.delete('/api/admin/photos/:key', requireAdmin, async (req, res) => {
   const key = req.params.key;
   if (!validKey(key)) return res.status(404).json({ error: 'Unknown package' });
   clearUploads(key);
+  if (IMG.STORE.get(key)) { try { await IMG.STORE.remove(key); } catch (e) { return res.status(502).json({ error: e.message }); } }
   res.json({ ok: true });
 });
 
@@ -342,6 +349,7 @@ app.use(require('./rebrand')(PUB));
 app.get('/img/hero-scene.svg', (req, res) => {   // home page background: your uploaded photo, or the default scene
   const f = IMG.heroFile();
   res.set('Cache-Control', 'no-cache');
+  if (IMG.STORE.get('hero')) return res.redirect(302, IMG.STORE.get('hero'));
   return f ? res.sendFile(f) : res.type('image/svg+xml').send(IMG.hero());
 });
 app.get('/img/:key.svg', (req, res) => {
@@ -352,6 +360,7 @@ app.get('/img/:key.svg', (req, res) => {
 app.get('/images/logo.svg', (req, res) => {
   const f = IMG.logoFile();
   res.set('Cache-Control', 'no-cache');
+  if (IMG.STORE.get('logo')) return res.redirect(302, IMG.STORE.get('logo'));
   return f ? res.sendFile(f) : res.type('image/svg+xml').send(IMG.logo());
 });
 app.use('/uploads', express.static(IMG.UPLOAD_DIR, { index: false, maxAge: '30d' }));
