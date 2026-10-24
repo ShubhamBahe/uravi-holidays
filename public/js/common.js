@@ -22,6 +22,12 @@
 
   /* ---------- Header / footer ---------- */
   var MAPS = 'https://maps.app.goo.gl/4U8Zeg9DdJ7AswoaA';
+  var FB = 'https://www.facebook.com/share/1Dizy6Eg3Z/', IG = 'https://www.instagram.com/uraviholidays/';
+  function socialLinks() {
+    return '<a class="s-fb" href="' + FB + '" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa fa-facebook"></i></a>' +
+      '<a class="s-ig" href="' + IG + '" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa fa-instagram"></i></a>' +
+      '<a class="s-wa" href="' + WA + 'Hi" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fa fa-whatsapp"></i></a>';
+  }
   var HEADER = '' +
     '<div class="topbar"><div class="container topbar__inner">' +
       '<ul class="topbar__info">' +
@@ -30,8 +36,9 @@
         '<li><a href="tel:+918765043591"><i class="fa fa-phone"></i> +91 87660 43591</a></li>' +
       '</ul>' +
       '<ul class="social">' +
-        '<li><a href="mailto:infouraviholidays@gmail.com" aria-label="Email"><i class="fa fa-envelope"></i></a></li>' +
-        '<li><a href="' + WA + 'Hi" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fa fa-whatsapp"></i></a></li>' +
+        '<li><a class="s-fb" href="' + FB + '" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa fa-facebook"></i></a></li>' +
+        '<li><a class="s-ig" href="' + IG + '" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa fa-instagram"></i></a></li>' +
+        '<li><a class="s-wa" href="' + WA + 'Hi" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fa fa-whatsapp"></i></a></li>' +
         '<li><a class="topbar__admin" href="/admin" aria-label="Admin login" title="Admin login"><i class="fa fa-lock"></i></a></li>' +
       '</ul>' +
     '</div></div>' +
@@ -54,6 +61,7 @@
   var FOOTER = '' +
     '<footer class="footer"><div class="container footer__grid">' +
       '<div><h4>Uravi Holidays</h4><p>Your Trusted Travel Partner</p><p><em>Travel Beyond Boundaries</em></p>' +
+        '<div class="social social--footer">' + socialLinks() + '</div>' +
         '<a class="btn btn--sm" href="/privacy-policy.php">Privacy Policy</a></div>' +
       '<div><h4>Address &amp; Contact</h4>' +
         '<p><i class="fa fa-map-marker"></i> Imperial Plaza, Trenton Business Centre, 5th Floor, Block No. 5, Somwar Bazar Road, Bardi, Nagpur.</p>' +
