@@ -14,16 +14,20 @@ const srv = app.listen(0, async () => {
   const send = (p, method, body, h) => fetch(base + p, { method, headers: Object.assign({ 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' }, h), body: body && JSON.stringify(body) });
   try {
     // every page
-    for (const p of ['/', '/index.php', '/contact.php', '/privacy-policy.php', '/main-one-day-tour.php', '/main-jungle-safari.php', '/india-tour-packages.php',
+    for (const p of ['/', '/contact.php', '/privacy-policy.php', '/main-one-day-tour.php', '/main-jungle-safari.php', '/india-tour-packages.php',
       '/world-tour-packages.php', '/search.php?q=goa', '/customized-holidays.php', '/corporate-travel.php', '/services.php', '/admin', '/style.css', '/js/common.js', '/images/logo.svg', '/images/favicon.svg']) {
       const r = await get(p); ok(r.status === 200, p + ' -> ' + r.status);
     }
     ok((await get('/1/index.php')).status === 301, '/1/index.php redirect');
-    for (const p of ['/gallery', '/gallery/', '/robots.txt', '/sitemap.xml', '/api/gallery']) { const r = await get(p); ok(r.status === 200, p + ' -> ' + r.status); }
+    for (const p of ['/gallery', '/robots.txt', '/sitemap.xml', '/api/gallery']) { const r = await get(p); ok(r.status === 200, p + ' -> ' + r.status); }
     ok((await get('/gallery.php')).status === 301 && (await get('/gallery.php')).headers.get('location') === '/gallery', 'gallery.php redirect');
     ok((await get('/about-us')).status === 301, 'old about-us redirect');
     ok(/Sitemap:/.test(await (await get('/robots.txt')).text()), 'robots has sitemap');
-    ok(/<loc>.*\/gallery<\/loc>/.test(await (await get('/sitemap.xml')).text()), 'sitemap has gallery');
+    ok(!/<loc>.*\/gallery<\/loc>/.test(await (await get('/sitemap.xml')).text()), 'sitemap leaves out the gallery');
+    ok((await get('/index.php')).status === 301 && (await get('/index.php')).headers.get('location') === '/', '/index.php redirects to /');
+    ok((await get('/gallery/')).status === 301 && (await get('/gallery/')).headers.get('location') === '/gallery', '/gallery/ redirects to /gallery');
+    { const h = await (await get('/')).text(); ok(/class="card"/.test(h) && /application\/ld\+json/.test(h), 'home page has cards and structured data in the HTML'); }
+    ok(/name="robots" content="noindex/.test(await (await get('/gallery')).text()), 'gallery asks Google not to list it');
     ok((await get('/nope.php')).status === 404, 'unknown php 404');
     ok((await get('/api/nope')).status === 404, 'unknown api 404');
 

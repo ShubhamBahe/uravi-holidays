@@ -144,10 +144,33 @@ ${waves}
 <g transform="translate(790 100) rotate(-12)" fill="#fff"><path d="M0 0 L60 -8 L92 0 L60 8Z"/><path d="M30 -2 L52 -34 L62 -34 L52 -2Z"/><path d="M30 2 L52 34 L62 34 L52 2Z"/><path d="M6 0 L0 -14 L10 -14 L18 0Z"/></g>
 </svg>`;
 }
+/* Photos you committed to GitHub in public/images (e.g. "Kashmir.jpeg", "Pench Jungle Safari.jpeg") are part of the code, so they
+   survive every restart and redeploy. They are matched to a package by name, ignoring capitals, spaces and punctuation. */
+const normName = s => String(s).toLowerCase().replace(/&amp;/g, 'and').replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '');
+const IMG_RE = /\.(jpe?g|png|webp)$/i;
+const RESERVED = /^(logo|hero|bg|favicon.*|apple-touch-icon)$/i;
+let committedIdx = null;
+function committed() {
+  if (committedIdx) return committedIdx;
+  committedIdx = new Map();
+  let files = [];
+  try { files = fs.readdirSync(path.join(PUB, 'images')); } catch (e) { /* no folder */ }
+  files.filter(f => IMG_RE.test(f) && !RESERVED.test(f.replace(IMG_RE, ''))).forEach(f => {
+    const k = normName(f.replace(IMG_RE, '').replace(/#U([0-9a-f]{4})/gi, (m, h) => String.fromCharCode(parseInt(h, 16))));
+    if (k && !committedIdx.has(k)) committedIdx.set(k, f);
+  });
+  return committedIdx;
+}
+function committedPhoto(item) {
+  const f = committed().get(normName(item.name)) || committed().get(normName(item.imgKey));
+  return f ? '/images/' + encodeURIComponent(f) : null;
+}
 function sourceOf(item) { return uploadedPhoto(item.imgKey) ? 'upload' : photoFor(item) ? 'file' : 'illustration'; }
 function photoFor(item) {
   const up = uploadedPhoto(item.imgKey);
   if (up) return up;
+  const cp = committedPhoto(item);
+  if (cp) return cp;
   const c = [];
   if (item.photo) c.push('/images/one-day-tour/' + item.photo);
   ['jpg', 'jpeg', 'png', 'webp'].forEach(e => c.push('/images/photos/' + item.imgKey + '.' + e));

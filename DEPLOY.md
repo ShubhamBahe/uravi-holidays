@@ -27,6 +27,11 @@
    Caddy fetches and renews the HTTPS certificate by itself. Open `https://your-domain/admin`.
 3. Update later with `git pull && docker compose up -d --build`. Data lives in the `uravi-data` volume and survives.
 
+## Photos that never disappear (simplest: commit them)
+Put a photo in `public/images/` on GitHub named exactly like the package (for example `Kashmir.jpeg`, `Pench Jungle Safari.jpeg`).
+The site matches the name automatically (capitals, spaces and punctuation are ignored) and the photo is part of the code, so it survives every restart.
+Photos uploaded in `/admin` need Cloudinary or a persistent disk, see below.
+
 ## Keep admin photos forever (free hosts with no persistent disk)
 Hosts such as Render (free plan), Vercel or Heroku delete every file the site saves when they restart, so photos uploaded
 in the admin panel disappear. Fix it for free with Cloudinary (no credit card):

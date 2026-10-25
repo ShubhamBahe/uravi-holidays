@@ -182,14 +182,13 @@ app.get('/api/search', (req, res) => {
   res.json({ q, items: scored.slice(0, 40).map(x => card(x.it)) });
 });
 
-app.get('/api/featured', (req, res) => {
-  const pick = ['main-goa-tour-package', 'main-kashmir-tour-package', 'main-kerala-tour-package', 'main-rajasthan-tour-package',
-    'dubai-delight-tour-6d', 'simply-singapore-4-days', 'main-thailand-tour-package', 'main-maldives-package'];
-  res.json({
-    tours: D.items.filter(i => i.kind === 'tour').slice(0, 6).map(card),
-    destinations: pick.map(s => D.bySlug[s]).filter(Boolean).map(card)
-  });
+const FEATURED = ['main-goa-tour-package', 'main-kashmir-tour-package', 'main-kerala-tour-package', 'main-rajasthan-tour-package',
+  'dubai-delight-tour-6d', 'simply-singapore-4-days', 'main-thailand-tour-package', 'main-maldives-package'];
+const featured = () => ({
+  tours: D.items.filter(i => i.kind === 'tour').slice(0, 6).map(card),
+  destinations: FEATURED.map(s => D.bySlug[s]).filter(Boolean).map(card)
 });
+app.get('/api/featured', (req, res) => res.json(featured()));
 
 app.get('/api/gallery', (req, res) => {          // every package that has a real photo (uploaded or committed)
   const photos = D.items.filter(it => IMG.sourceOf(it) !== 'illustration')
@@ -381,14 +380,14 @@ app.get('/robots.txt', (req, res) => res.type('text/plain').send(
   'User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: ' + BASE + '/sitemap.xml\n'));
 app.get('/sitemap.xml', (req, res) => {
   const base = BASE || (req.protocol + '://' + req.get('host'));
-  const urls = ['/', '/gallery', '/india-tour-packages.php', '/world-tour-packages.php', '/main-jungle-safari.php', '/main-one-day-tour.php',
+  const urls = ['/', '/india-tour-packages.php', '/world-tour-packages.php', '/main-jungle-safari.php', '/main-one-day-tour.php',
     '/customized-holidays.php', '/corporate-travel.php', '/services.php', '/contact.php', '/privacy-policy.php'].concat(D.items.map(i => '/' + i.file));
   res.type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    urls.map(u => '<url><loc>' + base + u.replace(/&/g, '&amp;') + '</loc></url>').join('\n') + '\n</urlset>');
+    urls.map((u, i) => '<url><loc>' + base + (u === '/' ? '/' : u).replace(/&/g, '&amp;') + '</loc>' + (i === 0 ? '<priority>1.0</priority>' : '') + '</url>').join('\n') + '\n</urlset>');
 });
 // Addresses that Google or old links may still use (old website versions). Each one is sent permanently (301) to the matching page.
 const OLD_URLS = {
-  '/index.html': '/', '/home': '/', '/index': '/',
+  '/index.html': '/', '/index.php': '/', '/home': '/', '/index': '/',
   '/gallery.php': '/gallery', '/gallery.html': '/gallery', '/photos': '/gallery', '/photo-gallery': '/gallery', '/gallery/index.php': '/gallery',
   '/contact': '/contact.php', '/contact-us': '/contact.php', '/contact-us.php': '/contact.php', '/contactus': '/contact.php', '/contactus.php': '/contact.php',
   '/about': '/contact.php', '/about-us': '/contact.php', '/about-us.php': '/contact.php', '/aboutus.php': '/contact.php',
@@ -403,14 +402,64 @@ const OLD_URLS = {
   '/customized-holidays': '/customized-holidays.php', '/corporate-travel': '/corporate-travel.php', '/enquiry': '/customized-holidays.php'
 };
 app.use((req, res, next) => {
+  if ((req.method === 'GET' || req.method === 'HEAD') && req.path.length > 1 && req.path.endsWith('/') && !req.path.startsWith('/api/') && !req.path.startsWith('/uploads/'))
+    return res.redirect(301, req.path.replace(/\/+$/, '') + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''));
+  next();
+});
+app.use((req, res, next) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') return next();
   const key = req.path.toLowerCase().replace(/\/+$/, '') || '/';
   const to = OLD_URLS[key];
   if (to && to !== key) return res.redirect(301, to + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''));
   next();
 });
-app.get('/gallery', send('gallery.html'));
-app.get('/', send('index.html'));
+app.get('/gallery', send('gallery.html'));   // gallery.html carries <meta name="robots" content="noindex, follow">: Google lists the home page instead
+/* The home page is sent with its tour cards, a text introduction and structured data already in the HTML, so Google can read and
+   index it without running JavaScript (the browser still replaces the cards with the live ones, exactly as before). */
+const hx = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function cardMarkup(t) {
+  const badge = t.score ? t.score.toFixed(1) + ' ★' : t.days + (t.days === 1 ? ' Day' : ' Days');
+  const meta = t.kind === 'tour' ? ['Sightseeing', 'Transfer', '1 Day', 'Nagpur'] : [t.days + (t.days === 1 ? ' Day' : ' Days'), t.region].concat(t.highlights.slice(0, 1));
+  const wa = 'https://api.whatsapp.com/send?phone=' + D.SITE.whatsapp + '&text=' + encodeURIComponent('Hi, I want details for the ' + t.name + ' tour.');
+  return '<article class="card"><a class="card__img" href="' + hx(t.href) + '"><span class="card__score">' + hx(badge) + '</span>' +
+    '<img src="' + hx(t.img) + '" alt="' + hx(t.name) + '" loading="lazy" onerror="this.style.display=\'none\'"></a>' +
+    '<div class="card__body"><h3><a href="' + hx(t.href) + '">' + hx(t.name) + '</a></h3>' +
+    '<ul class="card__meta">' + meta.map(m => '<li>' + hx(m) + '</li>').join('') + '</ul>' +
+    '<div class="card__foot"><div class="card__price"><small>Price</small><strong>On request</strong></div>' +
+    '<div class="card__actions"><a class="btn btn--sm btn--ghost" href="' + hx(t.href) + '">Details</a> ' +
+    '<a class="btn btn--sm" href="' + hx(wa) + '" target="_blank" rel="noopener">Get Quote</a></div></div></div></article>';
+}
+function homeHtml() {
+  const S = D.SITE, f = featured();
+  const ld = {
+    '@context': 'https://schema.org', '@type': 'TravelAgency', '@id': BASE + '/#business', name: S.name, url: BASE + '/',
+    description: 'Tour packages, flight and railway tickets, passport assistance, visa services and travel insurance from Nagpur.',
+    telephone: S.phone, email: S.email, image: BASE + '/images/logo.png', logo: BASE + '/images/logo.png',
+    address: { '@type': 'PostalAddress', streetAddress: S.address.full, addressLocality: 'Nagpur', addressRegion: 'Maharashtra', addressCountry: 'IN' },
+    sameAs: [S.social.instagram, S.social.facebook].filter(Boolean)
+  };
+  const site = { '@context': 'https://schema.org', '@type': 'WebSite', name: S.name, alternateName: ['Uravi Holidays Nagpur', 'URAVIHolidays.in'], url: BASE + '/' };
+  const head = '<meta property="og:type" content="website"><meta property="og:site_name" content="' + hx(S.name) + '">' +
+    '<meta property="og:title" content="' + hx(S.name + ', Nagpur | Tour Packages, Tickets, Visa & Travel Insurance') + '">' +
+    '<meta property="og:url" content="' + hx(BASE + '/') + '"><meta property="og:image" content="' + hx(BASE + '/images/logo.png') + '">' +
+    '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, '\\u003c') + '</script>' +
+    '<script type="application/ld+json">' + JSON.stringify(site).replace(/</g, '\\u003c') + '</script>';
+  const about = '<section class="section"><div class="container"><h2 class="section-title">About ' + hx(S.name) + '</h2>' +
+    '<p style="max-width:820px;margin:0 auto;text-align:center">' + hx(S.name) + ' is a travel agency in Nagpur offering domestic and international holiday packages, ' +
+    'one-day tours and jungle safaris from Nagpur, flight and railway tickets, passport assistance, visa services and travel insurance. ' +
+    hx(S.slogan) + '. Call ' + hx(S.phones.join(' or ')) + '.</p></div></section>';
+  let h = fs.readFileSync(path.join(PUB, 'index.html'), 'utf8');
+  h = h.replace('</head>', head + '</head>')
+    .replace('<div class="cards" id="homeTours"></div>', '<div class="cards" id="homeTours">' + f.tours.map(cardMarkup).join('') + '</div>')
+    .replace('<div class="cards" id="homeDest"></div>', '<div class="cards" id="homeDest">' + f.destinations.map(cardMarkup).join('') + '</div>')
+    .replace('<div id="site-header"></div>', '<div id="site-header"><nav aria-label="Main" style="padding:10px 16px;text-align:center"><a href="/">Home</a> · <a href="/india-tour-packages.php">Domestic</a> · <a href="/world-tour-packages.php">International</a> · <a href="/main-jungle-safari.php">Jungle Safari</a> · <a href="/main-one-day-tour.php">Nagpur Special Tours</a> · <a href="/customized-holidays.php">Customized Holidays</a> · <a href="/corporate-travel.php">Corporate Travel</a> · <a href="/services.php">Services</a> · <a href="/contact.php">Contact us</a></nav></div>')
+    .replace('<section class="section section--alt"><div class="container contact">', about + '<section class="section section--alt"><div class="container contact">');
+  return require('./rebrand').rebrand(h, false);
+}
+app.get('/', (req, res) => {
+  try { res.set({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' }).send(homeHtml()); }
+  catch (e) { console.error(e); res.sendFile(path.join(PUB, 'index.html')); }
+});
 app.get('/admin', send('admin.html'));
 app.get('/1/index.php', (req, res) => res.redirect(301, '/customized-holidays.php'));
 app.get(/\.php$/i, (req, res, next) => {
@@ -429,6 +478,9 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
+  IMG.STORE.ready.then(startServer);
+}
+function startServer() {
   const server = app.listen(PORT, () => {
     console.log('Uravi Holidays running at http://localhost:' + PORT);
     console.log('Admin panel: http://localhost:' + PORT + '/admin');

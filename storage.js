@@ -10,7 +10,8 @@ const m = /^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/.exec((process.env.CLOUDINARY_U
 const enabled = !!m;
 const API = (process.env.CLOUDINARY_API_BASE || 'https://api.cloudinary.com').replace(/\/+$/, '');
 const [, KEY, SECRET, CLOUD] = m || [];
-const urls = new Map();                                   // image key ("logo", "hero", "main-goa-tour-package") -> https url
+const urls = new Map();
+const recent = new Map();                                 // key -> {url, at}: photos saved in the last few minutes (the listing can lag behind)                                   // image key ("logo", "hero", "main-goa-tour-package") -> https url
 let lastError = '';
 
 const idOf = key => 'uravi/' + (key === 'logo' || key === 'hero' ? key : 'photos/' + key);
@@ -30,6 +31,7 @@ async function refresh() {
       (j.resources || []).forEach(x => { const k = keyOf(x.public_id); if (k) next.set(k, x.secure_url); });
       cursor = j.next_cursor || '';
     } while (cursor);
+    recent.forEach((r, k) => { if (Date.now() - r.at > 5 * 60e3) recent.delete(k); else if (!next.has(k)) next.set(k, r.url); });
     urls.clear(); next.forEach((v, k) => urls.set(k, v)); lastError = '';
   } catch (e) { lastError = e.message; console.error('Image storage:', e.message); }   // keep what we already know
 }
@@ -43,7 +45,7 @@ async function save(key, buffer, mime) {
   const r = await fetch(endpoint('/image/upload'), { method: 'POST', body: f });
   const j = await r.json().catch(() => ({}));
   if (!r.ok || !j.secure_url) throw new Error((j.error && j.error.message) || 'Image storage rejected the upload');
-  urls.set(key, j.secure_url);
+  urls.set(key, j.secure_url); recent.set(key, { url: j.secure_url, at: Date.now() });
   return j.secure_url;
 }
 
@@ -55,6 +57,9 @@ async function remove(key) {
   urls.delete(key);
 }
 
-if (enabled) { refresh(); setInterval(refresh, 60e3).unref(); }
+// The list of stored photos is loaded once at start-up. server.js waits for `ready` before accepting visitors, so the first
+// requests after a restart never show placeholder pictures while the list is still loading.
+const ready = enabled ? Promise.race([refresh(), new Promise(r => setTimeout(r, 8000))]) : Promise.resolve();
+if (enabled) setInterval(refresh, 5 * 60e3).unref();
 
-module.exports = { enabled, get: k => (enabled && urls.get(k)) || null, save, remove, refresh, error: () => lastError };
+module.exports = { enabled, ready, get: k => (enabled && urls.get(k)) || null, save, remove, refresh, error: () => lastError };
