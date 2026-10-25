@@ -123,25 +123,61 @@ function logoFile() {
 function heroFile() {
   return findCI(UPLOAD_DIR, ['hero'], EXTS) || findCI(path.join(PUB, 'images'), ['hero'], EXTS);
 }
-function hero() {   // default home page background: a sunset over sea and mountains with a plane
-  const waves = [0, 1, 2, 3, 4, 5].map(i => `<path d="M0 ${452 + i * 26} q50 -14 100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0" stroke="#fff" stroke-opacity="${(0.22 - i * 0.025).toFixed(3)}" fill="none" stroke-width="3"/>`).join('');
+function hero() {   // default home page background: a glowing twilight over snow mountains and sea, with drifting clouds, balloons and a plane
+  const r = rng(20261026);
+  const stars = Array.from({ length: 70 }, (_, i) => {
+    const x = Math.round(r() * 1600), y = Math.round(r() * 230), s = (0.8 + r() * 1.6).toFixed(1), d = (2 + r() * 4).toFixed(1), b = (r() * 5).toFixed(1);
+    return `<circle class="tw" cx="${x}" cy="${y}" r="${s}" fill="#fff" style="animation-duration:${d}s;animation-delay:-${b}s"/>`;
+  }).join('');
+  const waves = Array.from({ length: 7 }, (_, i) => `<path class="wv" d="M-100 ${470 + i * 20} q50 -12 100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0" stroke="#fff" stroke-opacity="${(0.32 - i * 0.03).toFixed(2)}" stroke-width="${2 + i * 0.4}" fill="none" style="animation-duration:${7 + i * 1.5}s;animation-direction:${i % 2 ? 'reverse' : 'normal'}"/>`).join('');
+  const balloon = (x, y, s, c1, c2, dur, dl) => `<g class="fl" style="animation-duration:${dur}s;animation-delay:-${dl}s"><g transform="translate(${x} ${y}) scale(${s})">
+<path d="M0 -60 C-46 -60 -52 -8 -18 34 L18 34 C52 -8 46 -60 0 -60Z" fill="${c1}"/><path d="M0 -60 C-18 -50 -22 -6 -8 34 L8 34 C22 -6 18 -50 0 -60Z" fill="${c2}"/>
+<path d="M-18 34 L-9 56 M18 34 L9 56 M-6 34 L-5 56 M6 34 L5 56" stroke="#3a2a22" stroke-width="1.4"/><rect x="-10" y="56" width="20" height="13" rx="2.5" fill="#6b4226"/></g></g>`;
+  const cloud = (x, y, s, o, dur, dl) => `<g class="cl" style="animation-duration:${dur}s;animation-delay:-${dl}s" opacity="${o}"><g transform="translate(${x} ${y}) scale(${s})" fill="#fff">
+<ellipse cx="0" cy="0" rx="90" ry="20"/><ellipse cx="-40" cy="-14" rx="42" ry="22"/><ellipse cx="14" cy="-24" rx="50" ry="28"/><ellipse cx="58" cy="-8" rx="34" ry="18"/></g></g>`;
+  const bird = (x, y, s, dl) => `<path class="bd" d="M0 0 q8 -9 16 0 q8 -9 16 0" transform="translate(${x} ${y}) scale(${s})" stroke="#1d2f4f" stroke-width="2.2" fill="none" stroke-linecap="round" style="animation-delay:-${dl}s"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Travel scene">
 <defs>
-<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b3b3a"/><stop offset=".45" stop-color="#12807d"/><stop offset=".78" stop-color="#f0b45c"/><stop offset="1" stop-color="#ffd99a"/></linearGradient>
-<linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a9b96"/><stop offset="1" stop-color="#0a4a48"/></linearGradient>
-<radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff3d1" stop-opacity=".95"/><stop offset="1" stop-color="#fff3d1" stop-opacity="0"/></radialGradient>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1a3f"/><stop offset=".30" stop-color="#2a2f7a"/><stop offset=".52" stop-color="#b24a8c"/><stop offset=".72" stop-color="#ff7a59"/><stop offset=".88" stop-color="#ffc46b"/><stop offset="1" stop-color="#ffe7a8"/></linearGradient>
+<linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9d6e"/><stop offset=".18" stop-color="#c8577f"/><stop offset=".55" stop-color="#1b5d8a"/><stop offset="1" stop-color="#082b4d"/></linearGradient>
+<radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fffbe6"/><stop offset=".25" stop-color="#ffe9a6" stop-opacity=".95"/><stop offset=".6" stop-color="#ffb45f" stop-opacity=".35"/><stop offset="1" stop-color="#ff8a4d" stop-opacity="0"/></radialGradient>
+<linearGradient id="m1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d5aa6"/><stop offset="1" stop-color="#d98aa0"/></linearGradient>
+<linearGradient id="m2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4b3a86"/><stop offset="1" stop-color="#a45a8f"/></linearGradient>
+<linearGradient id="m3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f2d63"/><stop offset="1" stop-color="#43417f"/></linearGradient>
+<linearGradient id="refl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a6" stop-opacity=".9"/><stop offset="1" stop-color="#ffb45f" stop-opacity="0"/></linearGradient>
+<linearGradient id="haze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc46b" stop-opacity="0"/><stop offset="1" stop-color="#ffd9a0" stop-opacity=".55"/></linearGradient>
+<style>
+.tw{animation:tw 3s ease-in-out infinite}@keyframes tw{0%,100%{opacity:.15}50%{opacity:1}}
+.cl{animation:cl 90s linear infinite}@keyframes cl{from{transform:translateX(-260px)}to{transform:translateX(1900px)}}
+.fl{animation:fl 9s ease-in-out infinite}@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+.wv{animation:wv 8s linear infinite}@keyframes wv{from{transform:translateX(0)}to{transform:translateX(-200px)}}
+.pl{animation:pl 38s linear infinite}@keyframes pl{from{transform:translate(-200px,60px)}to{transform:translate(1800px,-40px)}}
+.bd{animation:bd 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes bd{0%,100%{transform:translate(0,0) scaleY(1)}50%{transform:translate(0,-3px) scaleY(.6)}}
+.sh{animation:sh 5s ease-in-out infinite}@keyframes sh{0%,100%{opacity:.55}50%{opacity:.95}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
 </defs>
 <rect width="1600" height="600" fill="url(#sky)"/>
-<circle cx="1180" cy="420" r="230" fill="url(#glow)"/><circle cx="1180" cy="420" r="80" fill="#fff0c4"/>
-<ellipse cx="260" cy="130" rx="150" ry="22" fill="#fff" opacity=".10"/><ellipse cx="420" cy="165" rx="110" ry="16" fill="#fff" opacity=".08"/><ellipse cx="1380" cy="110" rx="170" ry="24" fill="#fff" opacity=".09"/>
-<path d="M0 430 L120 350 L230 405 L360 310 L520 410 L640 360 L760 430 L900 450 H0Z" fill="#0e5f5c" opacity=".75"/>
-<path d="M880 450 L1010 380 L1100 420 L1230 345 L1380 415 L1480 372 L1600 430 V450 H880Z" fill="#0e5f5c" opacity=".7"/>
-<path d="M0 450 L160 395 L300 440 L470 385 L620 450Z" fill="#0a3f3d"/><path d="M1000 450 L1180 400 L1320 445 L1450 405 L1600 450Z" fill="#0a3f3d"/>
-<rect y="448" width="1600" height="152" fill="url(#sea)"/>
-<path d="M1120 452 h120 M1090 470 h180 M1060 492 h240 M1030 518 h300" stroke="#fff3d1" stroke-opacity=".5" stroke-width="5" stroke-linecap="round"/>
+${stars}
+<ellipse cx="800" cy="300" rx="900" ry="120" fill="#7a4fd0" opacity=".16"/><ellipse cx="400" cy="210" rx="520" ry="46" fill="#3fd0c9" opacity=".10"/>
+<circle cx="1160" cy="440" r="330" fill="url(#sun)"/><circle cx="1160" cy="440" r="64" fill="#fffbe6"/>
+${cloud(0, 150, 1.1, 0.16, 110, 20)}${cloud(0, 232, 0.8, 0.22, 85, 55)}${cloud(0, 105, 0.6, 0.12, 140, 90)}${cloud(0, 300, 1.3, 0.26, 100, 35)}
+<path d="M0 430 L90 360 L170 400 L290 300 L390 380 L470 340 L600 420 L720 372 L840 430 L900 470 H0Z" fill="url(#m1)" opacity=".9"/>
+<path d="M760 470 L880 392 L960 430 L1090 330 L1190 410 L1290 360 L1420 420 L1500 380 L1600 430 V470Z" fill="url(#m1)" opacity=".85"/>
+<path d="M0 470 L120 392 L210 440 L340 330 L410 390 L520 350 L650 450 L720 470Z" fill="url(#m2)"/>
+<path d="M340 330 L318 360 L336 352 L352 368 L366 350 L388 366Z" fill="#fff" opacity=".7"/>
+<path d="M980 470 L1110 395 L1210 445 L1350 350 L1440 420 L1530 392 L1600 440 V470Z" fill="url(#m2)"/>
+<path d="M1350 350 L1326 384 L1344 376 L1360 392 L1376 372 L1396 388Z" fill="#fff" opacity=".7"/>
+<path d="M0 470 L140 430 L260 462 L380 440 L470 470Z" fill="url(#m3)"/><path d="M1180 470 L1320 432 L1440 460 L1560 436 L1600 452 V470Z" fill="url(#m3)"/>
+<rect y="380" width="1600" height="95" fill="url(#haze)"/>
+<rect y="468" width="1600" height="132" fill="url(#sea)"/>
+<path class="sh" d="M1160 470 h0" stroke="none"/>
+<g class="sh"><path d="M1120 472 h80 M1085 486 h150 M1050 502 h220 M1010 520 h300 M975 542 h370 M940 566 h440" stroke="#fff3c9" stroke-width="5" stroke-linecap="round" stroke-opacity=".7"/></g>
 ${waves}
-<path d="M120 250 C 360 220, 560 130, 760 110" stroke="#fff" stroke-opacity=".5" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round" fill="none"/>
-<g transform="translate(790 100) rotate(-12)" fill="#fff"><path d="M0 0 L60 -8 L92 0 L60 8Z"/><path d="M30 -2 L52 -34 L62 -34 L52 -2Z"/><path d="M30 2 L52 34 L62 34 L52 2Z"/><path d="M6 0 L0 -14 L10 -14 L18 0Z"/></g>
+<g class="pl"><g transform="translate(0 150) rotate(-8)"><path d="M-170 6 H-6" stroke="#fff" stroke-opacity=".6" stroke-width="3" stroke-dasharray="2 11" stroke-linecap="round"/>
+<g fill="#fff"><path d="M0 0 L66 -9 L102 0 L66 9Z"/><path d="M34 -2 L58 -38 L69 -38 L58 -2Z"/><path d="M34 2 L58 38 L69 38 L58 2Z"/><path d="M6 0 L0 -15 L11 -15 L19 0Z"/></g></g></g>
+${balloon(250, 330, 0.8, '#ff5d73', '#ffd166', 9, 2)}${balloon(1430, 250, 0.62, '#4cc9f0', '#f72585', 11, 6)}${balloon(110, 215, 0.46, '#ffbe0b', '#fb5607', 10, 4)}
+${bird(560, 190, 1.1, 0)}${bird(600, 215, 0.8, 0.5)}${bird(1010, 150, 0.9, 1)}${bird(1050, 168, 0.7, 0.2)}
 </svg>`;
 }
 /* Photos you committed to GitHub in public/images (e.g. "Kashmir.jpeg", "Pench Jungle Safari.jpeg") are part of the code, so they

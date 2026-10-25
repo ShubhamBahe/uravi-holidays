@@ -208,7 +208,7 @@ h1, h2, h3, h4, h5 { margin: 0 0 .5rem; line-height: 1.25; }
 .toolbar input, .admin__filters input, .admin__filters select { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; font: 14px 'Poppins', sans-serif; min-width: 200px; }
 
 .section { padding: 44px 0 20px; } .section--alt { background: var(--white); }
-.hero { background: linear-gradient(135deg, rgba(15,47,46,.50), rgba(18,128,125,.22)), url('/img/hero-scene.svg') center/cover no-repeat; color: #fff; padding: 72px 0 64px; text-align: center; }
+.hero { background: linear-gradient(180deg, rgba(6,12,40,.38), rgba(6,12,40,.12) 55%, rgba(6,12,40,.30)), url('/img/hero-scene.svg') center/cover no-repeat; color: #fff; padding: 72px 0 64px; text-align: center; }
 .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); text-shadow: 0 2px 14px rgba(0, 0, 0, .45); }
 .hero p { text-shadow: 0 1px 10px rgba(0, 0, 0, .5); color: #fff; max-width: 56ch; margin: 0 auto 24px; }
 .hero__search { position: relative; display: flex; gap: 8px; max-width: 640px; margin: 0 auto; }
